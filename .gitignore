@@ -1,0 +1,17 @@
+# Ignora la cartella .vs di Visual Studio
+.vs/
+
+# Ignora cartelle bin e obj
+bin/
+obj/
+
+# Ignora file di configurazione utente di Visual Studio
+*.user
+*.suo
+
+# Ignora file di log
+*.log
+
+# Ignora configurazioni di sistema
+*.vscode/
+
