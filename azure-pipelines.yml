@@ -6,7 +6,9 @@
 trigger:
   branches:
     include:
-      - develop
+      - main
+      - Develop
+      - DashBe.Domain
 
 pool:
   vmImage: windows-latest
