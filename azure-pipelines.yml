@@ -2,7 +2,7 @@ trigger:
   branches:
     include:
       - main
-      - develop
+      - Develop
       - DashBe.Domain
 
 pool:
@@ -16,15 +16,15 @@ steps:
       version: '8.0.x'
 
   # Restora i pacchetti NuGet per la Solution
-  - script: dotnet restore DashBe.sln
+  - script: dotnet restore DashBe/DashBe.sln
     displayName: 'Restore NuGet Packages'
 
   # Compila la Solution
-  - script: dotnet build DashBe.sln --configuration Release --no-restore
+  - script: dotnet build DashBe/DashBe.sln --configuration Release --no-restore
     displayName: 'Build Solution'
 
   # Pubblica gli artefatti
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/DashBe'
       ArtifactName: 'drop'
