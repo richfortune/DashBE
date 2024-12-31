@@ -1,27 +1,29 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
     include:
       - main
-      - Develop
+      - develop
       - DashBe.Domain
 
 pool:
-  vmImage: windows-latest
+  vmImage: 'windows-latest'
 
 steps:
+  # Installa .NET SDK versione 8.0
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
       version: '8.0.x'
 
-  - script: dotnet build --configuration Release
+  # Restora i pacchetti NuGet per la Solution
+  - script: dotnet restore DashBe.sln
+    displayName: 'Restore NuGet Packages'
+
+  # Compila la Solution
+  - script: dotnet build DashBe.sln --configuration Release --no-restore
     displayName: 'Build Solution'
 
+  # Pubblica gli artefatti
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)'
