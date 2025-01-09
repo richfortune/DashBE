@@ -23,6 +23,13 @@ steps:
   - script: dotnet build DashBe/DashBe.sln --configuration Release --no-restore
     displayName: 'Build Solution'
 
+ # Copia i file nel directory di staging
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/bin/Release'
+      Contents: '**/*'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
   # Pubblica gli artefatti
   - task: PublishBuildArtifacts@1
     inputs:
