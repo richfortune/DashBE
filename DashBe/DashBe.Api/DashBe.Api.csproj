@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DashBe.Application\DashBe.Application.csproj" />
+    <ProjectReference Include="..\DashBe.Infrastructure\DashBe.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
