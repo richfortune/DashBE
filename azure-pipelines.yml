@@ -23,16 +23,20 @@ steps:
   - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
-  # Debug: Elenca i file nella directory di output
-  - script: dir $(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release
+ # Debug: Elenca i file nella directory di output
+  - script: dir "$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release"
     displayName: 'List Files in Build Output Directory'
 
   # Copia il file .nupkg nella directory di staging
   - task: CopyFiles@2
     inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release'
+      SourceFolder: '$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release'
       Contents: '**/*.nupkg'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Debug: Elenca i file nella directory di staging
+  - script: dir "$(Build.ArtifactStagingDirectory)"
+    displayName: 'List Files in Artifact Staging Directory'
 
   # Pubblica il file .nupkg come artefatto
   - task: PublishBuildArtifacts@1
