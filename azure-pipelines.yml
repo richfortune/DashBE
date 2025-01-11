@@ -15,23 +15,30 @@ steps:
       packageType: 'sdk'
       version: '8.0.x'
 
-  # Restora i pacchetti NuGet per la Solution
-  - script: dotnet restore DashBe/DashBe.sln
-    displayName: 'Restore NuGet Packages'
+  # Restore dei pacchetti NuGet per DashBe.Domain
+  - script: dotnet restore DashBe/DashBe.Domain/DashBe.Domain.csproj
+    displayName: 'Restore NuGet Packages for DashBe.Domain'
 
-  # Compila la Solution
-  - script: dotnet build DashBe/DashBe.sln --configuration Release --no-restore
-    displayName: 'Build Solution'
+  # Compila solo il progetto DashBe.Domain
+  - script: dotnet build DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release --no-restore
+    displayName: 'Build DashBe.Domain'
 
- # Copia i file nel directory di staging
+  # Copia i file della DLL di DashBe.Domain nella directory di staging
   - task: CopyFiles@2
     inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/bin/Release'
-      Contents: '**/*'
+      SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release'
+      Contents: '**/*.dll'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-  # Pubblica gli artefatti
+  # Pubblica gli artefatti della DLL
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/DashBe'
-      ArtifactName: 'drop'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'DashBe.Domain.DLL'
+
+  # (Opzionale) Pubblica la DLL su DashBeArtifacts NuGet Feed
+  - task: NuGetCommand@2
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.dll'
+      publishVstsFeed: 'DashBeArtifacts'
