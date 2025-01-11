@@ -9,38 +9,29 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-  # Installa .NET SDK versione 8.0
+  # Installa il .NET SDK versione 8.0
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
       version: '8.0.x'
 
-  # Restore dei pacchetti NuGet per DashBe.Domain
-  - script: dotnet restore DashBe/DashBe.Domain/DashBe.Domain.csproj
-    displayName: 'Restore NuGet Packages for DashBe.Domain'
+  # Compila il progetto DashBe.Domain
+  - script: dotnet build DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
+    displayName: 'Build DashBe.Domain'
 
-  # Compila solo il progetto DashBe.Domain
-  - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release --no-build
+  # Esegui il packing per DashBe.Domain
+  - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
-
-  # Copia i file della DLL di DashBe.Domain nella directory di staging
+  # Copia il file .nupkg nella directory di staging
   - task: CopyFiles@2
     inputs:
       SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release'
-      Contents: '**/*.dll'
+      Contents: '**/*.nupkg'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-  # Pubblica gli artefatti della DLL
+  # Pubblica il file .nupkg come artefatto
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'DashBe.Domain.DLL'
-
-  # (Opzionale) Pubblica la DLL su DashBeArtifacts NuGet Feed
-  - task: NuGetCommand@2
-    inputs:
-      command: push
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishVstsFeed: 'DashBeArtifacts'
-
+      ArtifactName: 'DashBe.Domain.Package'
