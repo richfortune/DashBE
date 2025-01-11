@@ -20,8 +20,9 @@ steps:
     displayName: 'Restore NuGet Packages for DashBe.Domain'
 
   # Compila solo il progetto DashBe.Domain
-  - script: dotnet build DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release --no-restore
-    displayName: 'Build DashBe.Domain'
+  - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release --no-build
+    displayName: 'Pack DashBe.Domain'
+
 
   # Copia i file della DLL di DashBe.Domain nella directory di staging
   - task: CopyFiles@2
@@ -40,5 +41,6 @@ steps:
   - task: NuGetCommand@2
     inputs:
       command: push
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.dll'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishVstsFeed: 'DashBeArtifacts'
+
