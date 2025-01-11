@@ -1,22 +1,38 @@
+trigger:
+  branches:
+    include:
+      - main
+      - Develop
+      - DashBe.Domain
+
+pool:
+  vmImage: 'windows-latest'
+
 steps:
+  # Installa il .NET SDK
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '8.0.x'
+
+  # Compila il progetto DashBe.Domain
+  - script: dotnet build DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
+    displayName: 'Build DashBe.Domain'
+
   # Esegui il packing per DashBe.Domain
   - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
   # Debug: Elenca i file nella directory di output
-  - script: dir "$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release"
+  - script: dir $(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release
     displayName: 'List Files in Build Output Directory'
 
   # Copia il file .nupkg nella directory di staging
   - task: CopyFiles@2
     inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release'
+      SourceFolder: '$(System.DefaultWorkingDirectory)/DashBe/DashBe.Domain/bin/Release'
       Contents: '**/*.nupkg'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  # Debug: Elenca i file nella directory di staging
-  - script: dir "$(Build.ArtifactStagingDirectory)"
-    displayName: 'List Files in Artifact Staging Directory'
 
   # Pubblica il file .nupkg come artefatto
   - task: PublishBuildArtifacts@1
