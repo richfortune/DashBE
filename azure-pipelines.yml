@@ -33,17 +33,10 @@ steps:
   # Debug: Elenca i file nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
-  - script: |
-      echo "Testing NuGet_PAT visibility"
-      echo $env:NUGET_PAT
-    displayName: 'Check NuGet_PAT Environment Variable'
-    env:
-      NUGET_PAT: $(NuGet_PAT)
 
-  # Pubblica il file .nupkg al feed
-  - task: NuGetCommand@2
-    inputs:
-      command: push
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/DashBe.Domain.1.0.0.nupkg'
-      publishVstsFeed: 'DashBeArtifacts'
-      allowPackageConflicts: true
+  # Push NuGet Package al feed utilizzando il System.AccessToken
+  - script: |
+      nuget.exe push "$(Build.ArtifactStagingDirectory)\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureArtifacts" -SkipDuplicate
+    displayName: 'Push NuGet Package to DashBeArtifacts'
+    env:
+      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json","username":"AzureDevOps","password":"$(System.AccessToken)"}]}'
