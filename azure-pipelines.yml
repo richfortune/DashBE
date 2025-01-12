@@ -9,22 +9,32 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-  # Installa .NET SDK versione 8.0
+  # Installa il .NET SDK
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
       version: '8.0.x'
 
-  # Restora i pacchetti NuGet per la Solution
-  - script: dotnet restore DashBe/DashBe.sln
-    displayName: 'Restore NuGet Packages'
+  # Compila il progetto DashBe.Domain
+  - script: dotnet build $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
+    displayName: 'Build DashBe.Domain'
 
-  # Compila la Solution
-  - script: dotnet build DashBe/DashBe.sln --configuration Release --no-restore
-    displayName: 'Build Solution'
+  # Esegui il packing per DashBe.Domain
+  - script: dotnet pack $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
+    displayName: 'Pack DashBe.Domain'
 
-  # Pubblica gli artefatti
-  - task: PublishBuildArtifacts@1
+  # Copia il file .nupkg nella directory di staging
+  - task: CopyFiles@2
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/DashBe'
-      ArtifactName: 'drop'
+      SourceFolder: '$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release'
+      Contents: '**/*.nupkg'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Debug: Elenca i file nella directory di staging
+  - script: dir "$(Build.ArtifactStagingDirectory)"
+    displayName: 'Debug Artifact Staging Directory'
+
+  # Pubblica il file .nupkg al feed usando nuget push
+  - script: |
+      nuget.exe push "D:\a\1\a\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "$(NuGet_PAT)" -SkipDuplicate
+    displayName: 'Push NuGet Package to DashBeArtifacts'
