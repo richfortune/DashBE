@@ -16,11 +16,11 @@ steps:
       version: '8.0.x'
 
   # Compila il progetto DashBe.Domain
-  - script: dotnet build DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
+  - script: dotnet build $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
     displayName: 'Build DashBe.Domain'
 
   # Esegui il packing per DashBe.Domain
-  - script: dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration Release
+  - script: dotnet pack $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
  # Debug: Elenca i file nella directory di output
