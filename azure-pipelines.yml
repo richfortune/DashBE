@@ -23,7 +23,7 @@ steps:
   - script: dotnet pack $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
- # Debug: Elenca i file nella directory di output
+  # Debug: Elenca i file nella directory di output
   - script: dir "$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release"
     displayName: 'List Files in Build Output Directory'
 
@@ -37,15 +37,8 @@ steps:
   # Debug: Elenca i file nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'List Files in Artifact Staging Directory'
-
-  # Pubblica il file .nupkg come artefatto
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'DashBe.Domain.Package'
-
-  - task: NuGetCommand@2
-    inputs:
-      command: push
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishVstsFeed: 'DashBeArtifacts'
+  
+  # Pubblica il file .nupkg al feed usando nuget push
+  - script: |
+      nuget.exe push $(Build.ArtifactStagingDirectory)/*.nupkg -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureDevOps"
+    displayName: 'Push NuGet Package to DashBeArtifacts'
