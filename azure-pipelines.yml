@@ -36,5 +36,5 @@ steps:
 
   # Pubblica il file .nupkg al feed usando nuget push
   - script: |
-      nuget.exe push "D:\a\1\a\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureDevOps"
+      nuget.exe push "D:\a\1\a\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureDevOps" -SkipDuplicate
     displayName: 'Push NuGet Package to DashBeArtifacts'
