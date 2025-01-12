@@ -43,3 +43,9 @@ steps:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: 'DashBe.Domain.Package'
+
+  - task: NuGetCommand@2
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishVstsFeed: 'DashBeArtifacts'
