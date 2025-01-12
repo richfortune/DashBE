@@ -34,10 +34,7 @@ steps:
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
 
-  # Pubblica il file .nupkg al feed usando NuGetCommand
-  - task: NuGetCommand@2
-    inputs:
-      command: push
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/DashBe.Domain.1.0.0.nupkg'
-      publishVstsFeed: 'DashBeArtifacts'
-      allowPackageConflicts: true
+  # Pubblica il file .nupkg al feed usando nuget push
+  - script: |
+      nuget.exe push "D:\a\1\a\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "$(NuGet_PAT)" -SkipDuplicate
+    displayName: 'Push NuGet Package to DashBeArtifacts'
