@@ -23,10 +23,6 @@ steps:
   - script: dotnet pack $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
     displayName: 'Pack DashBe.Domain'
 
-  # Debug: Elenca i file nella directory di output
-  - script: dir "$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release"
-    displayName: 'List Files in Build Output Directory'
-
   # Copia il file .nupkg nella directory di staging
   - task: CopyFiles@2
     inputs:
@@ -36,9 +32,9 @@ steps:
 
   # Debug: Elenca i file nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
-    displayName: 'List Files in Artifact Staging Directory'
-  
+    displayName: 'Debug Artifact Staging Directory'
+
   # Pubblica il file .nupkg al feed usando nuget push
   - script: |
-      nuget.exe push $(Build.ArtifactStagingDirectory)/*.nupkg -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureDevOps"
+      nuget.exe push "$(Build.ArtifactStagingDirectory)/*.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureDevOps"
     displayName: 'Push NuGet Package to DashBeArtifacts'
