@@ -33,6 +33,12 @@ steps:
   # Debug: Elenca i file nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
+  - script: |
+      echo "Testing NuGet_PAT visibility"
+      echo $env:NUGET_PAT
+    displayName: 'Check NuGet_PAT Environment Variable'
+    env:
+      NUGET_PAT: $(NuGet_PAT)
 
   # Pubblica il file .nupkg al feed
   - task: NuGetCommand@2
