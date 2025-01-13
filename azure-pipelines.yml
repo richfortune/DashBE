@@ -1,48 +1,45 @@
 trigger:
   branches:
     include:
+      - main  # La pipeline verrà eseguita solo su main.
+      - develop  # La pipeline verrà eseguita anche su develop.
+
+pr:
+  branches:
+    include:
       - main
-      - Develop
-      - DashBe.Domain
 
 pool:
   vmImage: 'windows-latest'
 
-steps:
-  # Debug: Verifica la visibilità del System.AccessToken
-  - script: |
-      echo "Testing System.AccessToken visibility"
-      echo System.AccessToken: $(System.AccessToken)
-    displayName: 'Check System.AccessToken Visibility'
+variables:
+  Configuration: 'Release'
 
-  # Installa il .NET SDK
+steps:
+  # Passaggio 1: Usa .NET SDK
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
       version: '8.0.x'
 
-  # Compila il progetto DashBe.Domain
-  - script: dotnet build $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
-    displayName: 'Build DashBe.Domain'
+  # Passaggio 2: Compila tutti i progetti della soluzione
+  - script: dotnet build DashBe/DashBe.sln --configuration $(Configuration)
+    displayName: 'Build Solution'
 
-  # Esegui il packing per DashBe.Domain
-  - script: dotnet pack $(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\DashBe.Domain.csproj --configuration Release
-    displayName: 'Pack DashBe.Domain'
-
-  # Copia il file .nupkg nella directory di staging
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)\DashBe\DashBe.Domain\bin\Release'
-      Contents: '**/*.nupkg'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  # Debug: Elenca i file nella directory di staging
-  - script: dir "$(Build.ArtifactStagingDirectory)"
-    displayName: 'Debug Artifact Staging Directory'
-
-  # Push NuGet Package al feed utilizzando System.AccessToken
+  # Passaggio 3: Genera i pacchetti NuGet per ogni progetto
   - script: |
-      nuget.exe push "$(Build.ArtifactStagingDirectory)\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey AzureArtifacts -SkipDuplicate
-    displayName: 'Push NuGet Package to DashBeArtifacts'
+      dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration $(Configuration) --output $(Build.ArtifactStagingDirectory)
+      dotnet pack DashBe/DashBe.Application/DashBe.Application.csproj --configuration $(Configuration) --output $(Build.ArtifactStagingDirectory)
+      dotnet pack DashBe/DashBe.Infrastructure/DashBe.Infrastructure.csproj --configuration $(Configuration) --output $(Build.ArtifactStagingDirectory)
+    displayName: 'Pack NuGet Packages'
+
+  # Passaggio 4: Pubblica i pacchetti NuGet su Azure Artifacts
+  - script: |
+      nuget.exe push "$(Build.ArtifactStagingDirectory)/*.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureArtifacts" -SkipDuplicate
+    displayName: 'Push NuGet Packages to Azure Artifacts'
     env:
-      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json","username":"AzureArtifacts","password":"$(System.AccessToken)"}]}'
+      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json", "username":"AzureDevOps", "password":"$(System.AccessToken)"}]}'
+
+  # Passaggio 5: Debug - Verifica i file generati
+  - script: dir $(Build.ArtifactStagingDirectory)
+    displayName: 'Debug Artifact Staging Directory'
