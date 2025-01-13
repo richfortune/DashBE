@@ -17,7 +17,7 @@ steps:
       packageType: 'sdk'
       version: '8.0.x'
 
-  # Passaggio 2: Compila tutti i progetti
+  # Passaggio 2: Compila la soluzione
   - script: |
       dotnet build DashBe/DashBe.sln -c $(Configuration)
     displayName: 'Build Solution'
@@ -29,13 +29,16 @@ steps:
       dotnet pack DashBe/DashBe.Infrastructure/DashBe.Infrastructure.csproj -c $(Configuration) --output $(Build.ArtifactStagingDirectory)
     displayName: 'Pack NuGet Packages'
 
-  # Passaggio 4: Debug - Verifica i pacchetti generati nella directory di staging
+  # Passaggio 4: Debug - Elenca i file nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
 
-  # Passaggio 5: Pubblica tutti i pacchetti NuGet su Azure Artifacts
+  # Passaggio 5: Pubblica i pacchetti NuGet, uno alla volta
   - script: |
-      nuget.exe push "$(Build.ArtifactStagingDirectory)/*.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureArtifacts" -SkipDuplicate
+      for %%f in ("$(Build.ArtifactStagingDirectory)\*.nupkg") do (
+        echo "Pushing package %%~nf"
+        nuget.exe push "%%f" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureArtifacts" -SkipDuplicate
+      )
     displayName: 'Push NuGet Packages to Azure Artifacts'
     env:
       VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json", "username":"AzureDevOps", "password":"$(System.AccessToken)"}]}'
