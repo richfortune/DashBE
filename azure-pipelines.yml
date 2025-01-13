@@ -9,23 +9,11 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-  # Debug: Elenca tutte le variabili di ambiente
-  - script: set
-    displayName: 'List All Environment Variables'
-
-  # Debug: Verifica se la variabile NuGet_PAT è visibile e il suo valore
-  - script: |
-      echo "Testing NuGet_PAT visibility"
-      echo NuGet_PAT: $env:NUGET_PAT
-    displayName: 'Check NuGet_PAT Environment Variable'
-
-  # Debug: Verifica se il System.AccessToken è visibile e il suo valore
+  # Debug: Verifica la visibilità del System.AccessToken
   - script: |
       echo "Testing System.AccessToken visibility"
-      echo System.AccessToken: $env:SYSTEM_ACCESSTOKEN
-    displayName: 'Check System.AccessToken Environment Variable'
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      echo System.AccessToken: $(System.AccessToken)
+    displayName: 'Check System.AccessToken Visibility'
 
   # Installa il .NET SDK
   - task: UseDotNet@2
@@ -52,7 +40,9 @@ steps:
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
 
-  # Push NuGet Package al feed utilizzando NuGet_PAT
+  # Push NuGet Package al feed utilizzando System.AccessToken
   - script: |
-      nuget.exe push "$(Build.ArtifactStagingDirectory)\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey $env:NUGET_PAT -SkipDuplicate
+      nuget.exe push "$(Build.ArtifactStagingDirectory)\DashBe.Domain.1.0.0.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey AzureArtifacts -SkipDuplicate
     displayName: 'Push NuGet Package to DashBeArtifacts'
+    env:
+      VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json","username":"AzureArtifacts","password":"$(System.AccessToken)"}]}'
