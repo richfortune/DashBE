@@ -1,3 +1,15 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  Configuration: 'Release'
+
 steps:
   # Passaggio 1: Usa .NET SDK
   - task: UseDotNet@2
@@ -6,40 +18,22 @@ steps:
       version: '8.0.x'
 
   # Passaggio 2: Compila tutti i progetti
-  - script: dotnet build DashBe/DashBe.sln --configuration $(Configuration)
+  - script: |
+      dotnet build DashBe/DashBe.sln -c $(Configuration)
     displayName: 'Build Solution'
 
-  # Passaggio 3: Genera i pacchetti NuGet
+  # Passaggio 3: Genera i pacchetti NuGet per ciascun progetto
   - script: |
-      dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj --configuration $(Configuration)
-      dotnet pack DashBe/DashBe.Application/DashBe.Application.csproj --configuration $(Configuration)
-      dotnet pack DashBe/DashBe.Infrastructure/DashBe.Infrastructure.csproj --configuration $(Configuration)
+      dotnet pack DashBe/DashBe.Domain/DashBe.Domain.csproj -c $(Configuration) --output $(Build.ArtifactStagingDirectory)
+      dotnet pack DashBe/DashBe.Application/DashBe.Application.csproj -c $(Configuration) --output $(Build.ArtifactStagingDirectory)
+      dotnet pack DashBe/DashBe.Infrastructure/DashBe.Infrastructure.csproj -c $(Configuration) --output $(Build.ArtifactStagingDirectory)
     displayName: 'Pack NuGet Packages'
 
-  # Passaggio 4: Copia i pacchetti .nupkg nella directory di staging
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: 'DashBe/DashBe.Domain/bin/Release'
-      Contents: '**/*.nupkg'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: 'DashBe/DashBe.Application/bin/Release'
-      Contents: '**/*.nupkg'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: 'DashBe/DashBe.Infrastructure/bin/Release'
-      Contents: '**/*.nupkg'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  # Passaggio 5: Debug - Verifica i pacchetti generati
+  # Passaggio 4: Debug - Verifica i pacchetti generati nella directory di staging
   - script: dir "$(Build.ArtifactStagingDirectory)"
     displayName: 'Debug Artifact Staging Directory'
 
-  # Passaggio 6: Pubblica tutti i pacchetti su Azure Artifacts
+  # Passaggio 5: Pubblica tutti i pacchetti NuGet su Azure Artifacts
   - script: |
       nuget.exe push "$(Build.ArtifactStagingDirectory)/*.nupkg" -Source "https://pkgs.dev.azure.com/x-code-group/CryptoSignature/_packaging/DashBeArtifacts/nuget/v3/index.json" -ApiKey "AzureArtifacts" -SkipDuplicate
     displayName: 'Push NuGet Packages to Azure Artifacts'
