@@ -34,30 +34,32 @@ namespace ConsoleApp1
                 }
             }
 
+            /*Metodo alternativo linq*/
+            //return iNumeri.Max();
+
             return iNumMax;
 
         }
         public static bool IsBalanced(string input)
         {
-            if (string.IsNullOrEmpty(input))
-                return false;
+            if (string.IsNullOrEmpty(input)) return false;
 
-            int Balanced = 0;
+            int IsBalance = 0;
 
             foreach (var item in input)
             {
                 if (item == '(')
                 {
-                    Balanced++;
+                    IsBalance++;
                 }
                 else if (item == ')')
                 {
-                    Balanced--;
-                    if (Balanced == 0) { return true; }
+                    IsBalance--;
+                    if (IsBalance < 0) { return false; }
                 }
             }
 
-            return Balanced == 0;
+            return IsBalance == 0;
         }
 
         public static bool AreAnagrams(string first, string second)
@@ -75,6 +77,17 @@ namespace ConsoleApp1
             var seconddict = second.GroupBy(g => g).ToDictionary(dc => dc.Key, dc => dc.Count());
 
             return firstdict.OrderBy(kvp => kvp.Key).SequenceEqual(seconddict.OrderBy(kvp => kvp.Key));
+
+            //metodo più veloce e corretto
+            //if (string.IsNullOrEmpty(first) && string.IsNullOrEmpty(second)) return false;
+
+            //first = string.Concat(first.ToLower().Where(char.IsLetterOrDigit));
+            //second = string.Concat(second.ToLower().Where(char.IsLetterOrDigit));
+
+            //if (first.Length != second.Length) return false;
+
+
+            //return first.OrderBy(c => c).SequenceEqual(second.OrderBy(c => c));
 
         }
 

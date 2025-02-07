@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace DashBe.Domain.Entities
 {
-    public class Entity<TPrimaryKey>
+    public abstract class Entity<TPrimaryKey>
     {
-        public TPrimaryKey Id { get; set; }
+        public TPrimaryKey Id { get; private set; }
+
+        protected Entity(TPrimaryKey id) 
+        {
+            Id = id;
+        }
     }
 }
