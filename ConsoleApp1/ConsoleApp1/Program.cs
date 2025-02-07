@@ -97,65 +97,68 @@ class Program
         if (number == null || number.Length == 0)
             throw new ArgumentException("sdffafdafasdf");
 
-        return number.GroupBy(g => g).Select(g => new {num = g.Key, sum = g.Sum() }).OrderByDescending(x=> x.sum).Select(x => (x.num, x.sum));
+        //return number.GroupBy(g => g).Select(g => new {num = g.Key, sum = g.Sum() }).OrderByDescending(x=> x.sum).Select(x => (x.num, x.sum));
+
+        /*versione semplificata*/
+        return number.GroupBy(g => g).OrderByDescending(g => g.Sum()).Select(g => (g.Key, g.Sum()));
         
 
     }
 
     public static int TrovaMassimo(int[] iNumeri)
     {
-        if (iNumeri == null || iNumeri.Length == 0) throw new ArgumentException("sdfadfasdfasdfafas");
+        if (iNumeri is null || iNumeri.Length == 0) throw new ArgumentException();
 
         int iNumMax = iNumeri[0];
 
-        foreach (var item in iNumeri)
+        foreach (int num in iNumeri) 
         {
-            if(item > iNumMax)
+            if (num > iNumMax)
             {
-                iNumMax = item;
+                iNumMax = num;
             }
         }
+
+        /*Metodo alternativo linq*/
+        //return iNumeri.Max();
 
         return iNumMax;
 
     }
     public static bool IsBalanced(string input)
     {
-       if(input == null || input.Length == 0)
-            return false;
+        if(string.IsNullOrEmpty(input)) return false;
 
-        int Balanced = 0;
+        int IsBalance = 0;
 
-       foreach (var item in input)
+        foreach (var item in input)
         {
-            if(item == '(')
+            if (item == '(')
             {
-                Balanced++;
+                IsBalance++;
             }
-            else if (item == ')') 
+            else if (item == ')')
             {
-                Balanced--;
-                if (Balanced == 0) return true;
+                IsBalance--;
+                if (IsBalance < 0) { return false; }
             }
         }
 
-       return Balanced == 0;
+        return IsBalance == 0;
+
     }
 
     public static bool AreAnagrams(string first, string second)
     {
-        if(string.IsNullOrEmpty(first) ||  string.IsNullOrEmpty(second)) return false;
+        if (string.IsNullOrEmpty(first) && string.IsNullOrEmpty(second)) return false;
 
-        first = new string(first.ToLower().Where(char.IsLetterOrDigit).ToArray());
-        second = new string(second.ToLower().Where(char.IsLetterOrDigit).ToArray());
+        first = string.Concat(first.ToLower().Where(char.IsLetterOrDigit));
+        second = string.Concat(second.ToLower().Where(char.IsLetterOrDigit));
 
-        if(first.Length != second.Length) return false;
+        if (first.Length != second.Length) return false;
 
-        var firstchar = first.GroupBy(g => g).ToDictionary(x => x.Key, x => x.Count());
-        var secondchar = second.GroupBy(g => g).ToDictionary(x => x.Key, x => x.Count());
-
-        return firstchar.OrderBy(kvp => kvp.Key).SequenceEqual(secondchar.OrderBy(kvp => kvp.Key));
-
+        
+        return first.OrderBy(c => c).SequenceEqual(second.OrderBy(c => c));
     }
 
     public static (List<int> EvenNumbers, List<int> OddNumbers) SeparateNumber(List<int> numbers)
