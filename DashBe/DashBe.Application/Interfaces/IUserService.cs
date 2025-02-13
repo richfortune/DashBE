@@ -1,4 +1,5 @@
-﻿using DashBe.Domain.Models;
+﻿using DashBe.Application.DTOs;
+using DashBe.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,6 @@ namespace DashBe.Application.Interfaces
         Task RegisterAsync(string username, string email, string password);
         Task AssignRoleAsync(Guid userId, int roleId);
 
-        Task<User> GetByIdAsync(Guid userId);
+        Task<UserDTO?> GetByIdAsync(Guid userId);
     }
 }

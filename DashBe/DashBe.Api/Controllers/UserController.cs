@@ -48,12 +48,13 @@ namespace DashBe.Api.Controllers
             return Ok(new { Token = token});
         }
 
-        [HttpPost("{userId}/roles/{roleId}")]
-        public async Task<IActionResult> AssignRole(Guid userId, int roleId)
+        [Authorize(Roles = "Admin")] 
+        [HttpPost("assign-role")]
+        public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto request)
         {
             try
             {
-                await _userService.AssignRoleAsync(userId, roleId);
+                await _userService.AssignRoleAsync(request.UserId, request.RoleId);
                 return Ok(new { Message = "Ruolo assegnato correttamente" });
             }
             catch (InvalidOperationException ex)
@@ -66,15 +67,11 @@ namespace DashBe.Api.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(Guid userId)
         {
-            var user = await _userService.GetByIdAsync(userId);
-
-            if (user == null)
+            var userDto = await _userService.GetByIdAsync(userId);
+            if (userDto == null)
                 return NotFound(new { Message = "Utente non trovato" });
 
-            // 🔥 Modifica: Recuperiamo i ruoli dalla tabella RoleUsers
-            var roles = user.RoleUsers.Select(ru => ru.Role.Name);
-
-            return Ok(new { Id = user.Id, Email = user.Email, Username = user.Username, Roles = roles });
+            return Ok(userDto);
         }
 
     }
