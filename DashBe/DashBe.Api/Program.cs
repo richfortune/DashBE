@@ -19,7 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Configurare SQLite come database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=Dash.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSwaggerGen(c =>
 {

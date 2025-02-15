@@ -1,5 +1,6 @@
 ﻿using DashBe.Application.Interfaces;
 using DashBe.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,6 +17,7 @@ namespace DashBe.Api.Controllers
             _validator = validator;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("validate")]
         public ActionResult<ValidationOPResult> Validate([FromBody] string input)
         {
