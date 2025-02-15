@@ -1,4 +1,6 @@
-﻿using DashBe.Application.Interfaces;
+﻿using DashBe.Application.DTOs;
+using DashBe.Application.Interfaces;
+using DashBe.Domain.Common;
 using DashBe.Domain.Models;
 using DashBe.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -25,17 +27,17 @@ namespace DashBe.Infrastructure.Services
         public async Task AssignRoleAsync(Guid userId, int roleId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
-
-            if(user == null){throw new InvalidOperationException("Utente non trovato");}
-
-            var role = await _context.Roles.FindAsync(roleId);
-            if (role == null)
+            if(user == null)
+                throw new InvalidOperationException("Utente non trovato");
+            
+            if (!await _userRepository.ExistsAsync<Role>(r => r.Id.Equals(roleId)))
                 throw new InvalidOperationException("Ruolo non trovato.");
 
 
-            var userRole = new RoleUser { UserId = userId, RoleId = roleId };
-            await _context.RoleUser.AddAsync(userRole);
-            await _context.SaveChangesAsync();
+            if (await _userRepository.UserRoleExistsAsync(userId, roleId))
+                throw new InvalidOperationException("L'utente ha già questo ruolo.");
+
+            await _userRepository.AssignRoleAsync(userId, roleId);
         }
 
         public async Task<User?> AuthenticateAsync(string username, string password)
@@ -53,43 +55,39 @@ namespace DashBe.Infrastructure.Services
             if (existingUser != null)
                 throw new InvalidOperationException("Username già in uso.");
 
-            var existingEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (existingEmail != null)
+            if (await _userRepository.ExistsAsync<User>(u => u.Email == email))
                 throw new InvalidOperationException("Email già registrata.");
 
-            // Genera un ID unico per il nuovo utente
             var userId = Guid.NewGuid();
-
-            // Hash della password
             var hashedPassword = _passwordHasher.HashPassword(null, password);
-
-            // Crea il nuovo utente
             var user = new User(userId, username, email, hashedPassword);
 
-            // Assegna automaticamente il ruolo "User" al nuovo utente
-            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-            if (defaultRole != null)
-            {
-                user.AssignRole(defaultRole);
-            }
+            //var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
 
-            // Salva l'utente nel database
+            var defaultRole = await _userRepository.GetRoleByIdAsync(Constants.DefaultUserRoleId);
+            if (defaultRole != null)
+                user.AssignRole(defaultRole);
+            
+
             await _userRepository.AddAsync(user);
+            
         }
 
         
-        public async Task<User?> GetByIdAsync(Guid userId)
+        public async Task<UserDTO?> GetByIdAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
 
-            // Qui possiamo aggiungere logiche extra in futuro (esempio: logging, validazioni)
             if (user == null)
-            {
-                // Log di errore (esempio)
-                Console.WriteLine($"User {userId} not found.");
-            }
+                return null;
 
-            return user;
+            return new UserDTO
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Username = user.Username,
+                Roles = user.RoleUsers.Select(ru => ru.Role.Name).ToList()
+            };
         }
 
     }
