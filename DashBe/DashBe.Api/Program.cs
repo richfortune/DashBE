@@ -6,20 +6,36 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddInfrastructureDi(builder.Configuration);
-
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 
+
 // Configurare SQLite come database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IApplicationDbContext, AppDbContext>();
+
+builder.Services.AddInfrastructureDi(builder.Configuration);
+
+var sqlPath = Environment.CurrentDirectory + @"/Dash.db";
+
+//Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console()
+    .WriteTo.File("Logs/app-log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+
+builder.Host.UseSerilog();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -109,6 +125,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();  // Abilitare JWT
 app.UseAuthorization();
+
+app.UseSerilogRequestLogging();
 
 
 app.UseCors("AllowAngularClient"); // Applica la policy CORS

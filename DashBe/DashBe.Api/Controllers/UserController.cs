@@ -74,5 +74,19 @@ namespace DashBe.Api.Controllers
             return Ok(userDto);
         }
 
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
+        {
+            var user = await _userService.ConfirmEmailAsync(token, email);
+
+            if (user == null)
+            {
+                return BadRequest(new { Message = "Link di conferma non valido o utente non trovato." });
+            }
+
+            return Ok(new { Message = "Email confermata con successo!" });
+        }
+
+
     }
 }
