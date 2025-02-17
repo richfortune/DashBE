@@ -15,5 +15,7 @@ namespace DashBe.Application.Interfaces
         Task AssignRoleAsync(Guid userId, int roleId);
 
         Task<UserDTO?> GetByIdAsync(Guid userId);
+
+        Task<User?> ConfirmEmailAsync(string token, string email);
     }
 }
