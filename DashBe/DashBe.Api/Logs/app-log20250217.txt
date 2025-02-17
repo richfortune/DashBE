@@ -1,0 +1,2 @@
+2025-02-17 15:40:42.242 +01:00 [INF] HTTP POST /api/users/authenticate responded 200 in 1790.6625 ms
+2025-02-17 15:41:02.660 +01:00 [INF] HTTP GET /api/users/F157A027-9B8B-4CE2-AE9A-9F5BAB3E4AC8 responded 200 in 86.7537 ms
