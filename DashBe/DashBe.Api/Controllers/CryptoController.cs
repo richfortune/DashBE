@@ -1,5 +1,7 @@
 ﻿using DashBe.Application.Interfaces;
+using DashBe.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace DashBe.Api.Controllers
 {
@@ -9,11 +11,13 @@ namespace DashBe.Api.Controllers
     {
         private readonly ICryptoService _cryptoService;
         private readonly ILogger<CryptoController> _logger;
+        private readonly AppDbContext _appDbContext;
 
-        public CryptoController(ICryptoService cryptoService, ILogger<CryptoController> logger)
+        public CryptoController(ICryptoService cryptoService, ILogger<CryptoController> logger, AppDbContext appDbContext)
         {
             _cryptoService = cryptoService;
             _logger = logger;
+            _appDbContext = appDbContext;
         }
 
         [HttpGet("currentprice")]

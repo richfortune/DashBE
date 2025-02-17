@@ -2,6 +2,7 @@
 using DashBe.Domain.Models;
 using DashBe.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,49 +14,81 @@ namespace DashBe.Infrastructure.Services
 {
     public class UserRepository : IUserRepository
     {
-        private readonly AppDbContext _context;
+        private readonly IApplicationDbContext _dbContext;
+        
 
-        public UserRepository(AppDbContext context)
+        public UserRepository(IApplicationDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
+            
         }
 
         public async Task AddAsync(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _dbContext.Insert(user);
+            try
+            {
+                await _dbContext.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
 
         public async Task AssignRoleAsync(Guid userId, int roleId)
         {
-            _context.RoleUser.Add(new RoleUser { UserId = userId, RoleId = roleId });
-            await _context.SaveChangesAsync();
+            _dbContext.Insert(new RoleUser { UserId = userId, RoleId = roleId });
+            await _dbContext.SaveAsync();
+
         }
 
         public async Task<User?> GetByIdAsync(Guid id) =>
-            await _context.Users.Include(u => u.RoleUsers).ThenInclude(ru => ru.Role).FirstOrDefaultAsync(u => u.Id == id);
+            await _dbContext.FirstOrDefaultAsync<User>(u => u.Id == id);
 
-        
-        public async Task<User?> GetByUsernameAsync(string username) =>
-            await _context.Users.Include(u => u.RoleUsers).ThenInclude(ru => ru.Role).FirstOrDefaultAsync(u => u.Username == username);
+        public async Task<User?> GetByIdWithRolesAsync(Guid id)
+        {
+            return await _dbContext.GetData<User>(true)
+                .Include(u => u.RoleUsers)
+                .ThenInclude(ru => ru.Role)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<User?> GetByUsernameAsync(string username) 
+        {
+            return await _dbContext.GetData<User>(true)
+                .Include(u => u.RoleUsers)
+                .ThenInclude(ru => ru.Role)
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _dbContext.GetData<User>(true)
+                .Include(u => u.RoleUsers)
+                .ThenInclude(ru => ru.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
 
         public async Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class =>
-                await _context.Set<T>().AnyAsync(predicate); 
+                //await _context.Set<T>().AnyAsync(predicate); 
+                await _dbContext.AnyAsync(predicate);
 
         public async Task UpdateAsync(User user)
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            _dbContext.Update(user);
+            await _dbContext.SaveAsync();
         }
 
         public async Task<Role?> GetRoleByIdAsync(int roleId)
         {
-            return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
+            return await _dbContext.FirstOrDefaultAsync<Role>(r => r.Id == roleId);
         }
 
         public async Task<bool> UserRoleExistsAsync(Guid userId, int roleId)
         {
-            return await _context.RoleUser.AnyAsync(ru => ru.UserId == userId && ru.RoleId == roleId);
+            return await _dbContext.AnyAsync<RoleUser>(ru => ru.UserId == userId && ru.RoleId == roleId);
         }
     }
 }

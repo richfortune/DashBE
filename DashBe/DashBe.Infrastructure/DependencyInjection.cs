@@ -1,6 +1,7 @@
 ﻿using DashBe.Application.Interfaces;
 using DashBe.Domain.Models;
 using DashBe.Infrastructure.Services;
+using DashBe.Infrastructure.Services.Message;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ namespace DashBe.Infrastructure
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 

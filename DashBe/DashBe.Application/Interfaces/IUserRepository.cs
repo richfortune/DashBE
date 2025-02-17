@@ -12,11 +12,14 @@ namespace DashBe.Application.Interfaces
     {
         Task<User?> GetByIdAsync(Guid id);
         Task<User?> GetByUsernameAsync(string username);
+        Task<User?> GetByEmailAsync(string email);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
         Task<bool> UserRoleExistsAsync(Guid userId, int roleId);
         Task AssignRoleAsync(Guid userId, int roleId);
         Task<bool> ExistsAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
+
+        Task<User?> GetByIdWithRolesAsync(Guid id);
 
         Task<Role?> GetRoleByIdAsync(int roleId);
 
