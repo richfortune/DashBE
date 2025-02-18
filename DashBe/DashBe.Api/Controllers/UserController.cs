@@ -63,6 +63,21 @@ namespace DashBe.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost("delete-user")]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            try
+            {
+                await _userService.DeleteUserAsync(userId);
+                return Ok(new { Message = "Utente eliminato correttamente" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(Guid userId)

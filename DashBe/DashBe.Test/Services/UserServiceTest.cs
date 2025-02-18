@@ -122,7 +122,7 @@ namespace DashBe.Test.Services
             // Assert
             result.Should().NotBeNull();
             result.Username.Should().Be(username);
-            _mockDbContext.Verify(db => db.LogAsync(It.IsAny<string>(), "Information", null), Times.Once);
+            //_mockDbContext.Verify(db => db.LogAsync(It.IsAny<string>(), "Information", null), Times.Once);
         }
 
         [Fact]

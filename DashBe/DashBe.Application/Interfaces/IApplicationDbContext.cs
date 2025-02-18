@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,6 +15,8 @@ namespace DashBe.Application.Interfaces
         void Insert<T>(T entity) where T : class;
         void Update<T>(T entity) where T : class;
         void Delete<T>(T entity) where T : class;
+        void DeleteRange<T>(IEnumerable<T> entities) where T : class;
+
         Task SaveAsync();
 
         Task<bool> ExistsAsync<T>(params object[] key) where T : class;
@@ -21,6 +24,8 @@ namespace DashBe.Application.Interfaces
         Task<T> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default) where T : class;
 
         Task LogAsync(string message, string logLevel, string exception = null);
+
+        DatabaseFacade Database { get; }
 
     }
 }

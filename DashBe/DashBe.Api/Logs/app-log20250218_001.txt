@@ -1,0 +1,5 @@
+2025-02-18 15:17:49.351 +01:00 [INF] HTTP POST /api/users/register responded 200 in 29999.1454 ms
+2025-02-18 15:19:19.912 +01:00 [INF] HTTP GET /api/users/confirm-email responded 200 in 112.9981 ms
+2025-02-18 15:19:20.948 +01:00 [INF] HTTP GET /favicon.ico responded 404 in 0.3953 ms
+2025-02-18 15:21:04.046 +01:00 [INF] HTTP POST /api/users/authenticate responded 200 in 138.2168 ms
+2025-02-18 15:22:25.746 +01:00 [INF] HTTP POST /api/users/delete-user responded 200 in 42.8092 ms
