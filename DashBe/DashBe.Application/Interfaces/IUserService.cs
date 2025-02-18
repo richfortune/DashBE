@@ -13,6 +13,7 @@ namespace DashBe.Application.Interfaces
         Task<User?> AuthenticateAsync(string username, string password);
         Task RegisterAsync(string username, string email, string password);
         Task AssignRoleAsync(Guid userId, int roleId);
+        Task DeleteUserAsync(Guid userId);
 
         Task<UserDTO?> GetByIdAsync(Guid userId);
 

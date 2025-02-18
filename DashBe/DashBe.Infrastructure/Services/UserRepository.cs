@@ -20,7 +20,6 @@ namespace DashBe.Infrastructure.Services
         public UserRepository(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
-            
         }
 
         public async Task AddAsync(User user)
@@ -49,7 +48,7 @@ namespace DashBe.Infrastructure.Services
 
         public async Task<User?> GetByIdWithRolesAsync(Guid id)
         {
-            return await _dbContext.GetData<User>(true)
+            return await _dbContext.GetData<User>()
                 .Include(u => u.RoleUsers)
                 .ThenInclude(ru => ru.Role)
                 .FirstOrDefaultAsync(u => u.Id == id);
@@ -80,6 +79,15 @@ namespace DashBe.Infrastructure.Services
             _dbContext.Update(user);
             await _dbContext.SaveAsync();
         }
+
+        public async Task DeleteUserAsync(User user)
+        {
+            //user.RoleUsers.ToList().ForEach(role => _dbContext.Delete(role));
+            _dbContext.DeleteRange(user.RoleUsers);
+            _dbContext.Delete(user);
+
+            await _dbContext.SaveAsync();
+         }
 
         public async Task<Role?> GetRoleByIdAsync(int roleId)
         {

@@ -3,6 +3,7 @@ using DashBe.Domain.Entities;
 using DashBe.Domain.Models;
 using DashBe.Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,8 @@ namespace DashBe.Infrastructure.Data
         public void Insert<T>(T entity) where T : class => Set<T>().Add(entity);
         public void Update<T>(T entity) where T : class => Set<T>().Update(entity);
         public void Delete<T>(T entity) where T : class => Set<T>().Remove(entity);
+        public void DeleteRange<T>(IEnumerable<T> entities) where T : class => Set<T>().RemoveRange(entities);
+
 
         public Task SaveAsync() => SaveChangesAsync();
 
@@ -69,10 +72,10 @@ namespace DashBe.Infrastructure.Data
             return await Set<T>().FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
+        public DatabaseFacade DatabaseFacade => base.Database;
+
         public async Task LogAsync(string message, string logLevel, string exception = null)
         {
-            
-
             var log = new Log
             {
                 Message = message,
