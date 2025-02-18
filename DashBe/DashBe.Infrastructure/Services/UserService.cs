@@ -62,9 +62,20 @@ namespace DashBe.Infrastructure.Services
                 return null;
             }
 
-            //await _dbContext.LogAsync($"Utente {username} autenticato con successo.", "Information");
-
             return user;
+        }
+
+        public async Task DeleteUserAsync(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                await _dbContext.LogAsync($"Eliminazione fallita: Utente {userId} non trovato.", "Warning");
+                throw new InvalidOperationException("Utente non trovato.");
+            }
+
+            await _userRepository.DeleteUserAsync(user);
+
         }
 
         public async Task RegisterAsync(string username, string email, string password)
@@ -84,8 +95,8 @@ namespace DashBe.Infrastructure.Services
             var hashedPassword = _passwordHasher.HashPassword(null, password);
             var user = new User(userId, username, email, hashedPassword)
             {
-                IsEmailConfirmed = false, // Aggiungi un flag per la conferma email
-                EmailConfirmationToken = Guid.NewGuid().ToString() // Generiamo un token di conferma
+                IsEmailConfirmed = false, 
+                EmailConfirmationToken = Guid.NewGuid().ToString() 
             };
 
             var defaultRole = await _userRepository.GetRoleByIdAsync(Constants.DefaultUserRoleId);
